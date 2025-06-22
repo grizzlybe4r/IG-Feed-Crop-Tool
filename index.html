@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IG Feed Crop Tool</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 25px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: #d62976;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        p.instructions {
+            text-align: center;
+            font-size: 14px;
+            color: #606770;
+            margin-bottom: 25px;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        input[type="file"], select {
+            padding: 10px;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        #size-recommendation {
+            font-size: 12px;
+            color: #007bff;
+            margin-top: 5px;
+            height: 15px;
+        }
+        button {
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        #results-container {
+            margin-top: 20px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            border-top: 1px solid #e0e0e0;
+            padding-top: 20px;
+        }
+        #image-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .result-item {
+            position: relative;
+            border: 1px solid #ddd;
+            background: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .result-item img {
+            display: block;
+            max-width: 150px; /* Thumbnail size */
+            height: auto;
+        }
+        .result-item .download-link {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            text-align: center;
+            padding: 5px 0;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .result-item:hover .download-link {
+            opacity: 1;
+        }
+        #spinner {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>IG Feed Crop Tool</h1>
+        <p class="instructions">Potong satu gambar panorama menjadi beberapa bagian untuk postingan carousel Instagram.</p>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="image-input">1. Unggah Gambar Anda</label>
+                <input type="file" id="image-input" accept="image/*">
+            </div>
+
+            <div class="control-group">
+                <label for="crop-count">2. Pilih Jumlah Potongan (Feed)</label>
+                <select id="crop-count">
+                    <option value="1">1 Feed (1080 x 1350 piks)</option>
+                    <option value="2">2 Feed (2160 x 1350 piks)</option>
+                    <option value="3">3 Feed (3240 x 1350 piks)</option>
+                    <option value="4">4 Feed (4320 x 1350 piks)</option>
+                    <option value="5">5 Feed (5400 x 1350 piks)</option>
+                    <option value="6">6 Feed (6480 x 1350 piks)</option>
+                    <option value="7" selected>7 Feed (7560 x 1350 piks)</option>
+                    <option value="8">8 Feed (8640 x 1350 piks)</option>
+                    <option value="9">9 Feed (9720 x 1350 piks)</option>
+                    <option value="10">10 Feed (10800 x 1350 piks)</option>
+                </select>
+                <div id="size-recommendation"></div>
+            </div>
+
+            <button id="crop-button" disabled>3. Potong & Unduh</button>
+        </div>
+
+        <div id="spinner">Memproses... mohon tunggu.</div>
+
+        <div id="results-container">
+            <div id="image-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('image-input');
+        const cropCountSelect = document.getElementById('crop-count');
+        const cropButton = document.getElementById('crop-button');
+        const imageGrid = document.getElementById('image-grid');
+        const spinner = document.getElementById('spinner');
+        const sizeRecommendation = document.getElementById('size-recommendation');
+
+        const CROP_HEIGHT = 1350;
+        const CROP_WIDTH = 1080;
+        let originalImage = null;
+
+        function updateRecommendation() {
+            const count = parseInt(cropCountSelect.value, 10);
+            const recommendedWidth = CROP_WIDTH * count;
+            sizeRecommendation.textContent = `Ukuran gambar yang disarankan: ${recommendedWidth}px x ${CROP_HEIGHT}px`;
+        }
+
+        imageInput.addEventListener('change', (event) => {
+            if (event.target.files && event.target.files[0]) {
+                originalImage = event.target.files[0];
+                cropButton.disabled = false;
+            } else {
+                originalImage = null;
+                cropButton.disabled = true;
+            }
+        });
+
+        cropCountSelect.addEventListener('change', updateRecommendation);
+        
+        cropButton.addEventListener('click', () => {
+            if (!originalImage) {
+                alert('Silakan pilih file gambar terlebih dahulu.');
+                return;
+            }
+
+            cropButton.disabled = true;
+            spinner.style.display = 'block';
+            imageGrid.innerHTML = ''; // Hapus hasil sebelumnya
+
+            const cropCount = parseInt(cropCountSelect.value, 10);
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    // Cek rasio aspek
+                    const expectedWidth = cropCount * CROP_WIDTH;
+                    if (img.width !== expectedWidth || img.height !== CROP_HEIGHT) {
+                        const userConfirmed = confirm(
+                            `Peringatan: Ukuran gambar Anda adalah ${img.width}x${img.height}px.\n` +
+                            `Ukuran yang disarankan untuk ${cropCount} feed adalah ${expectedWidth}x${CROP_HEIGHT}px.\n\n` +
+                            `Hasilnya mungkin tidak sempurna. Tetap lanjutkan?`
+                        );
+                        if (!userConfirmed) {
+                            spinner.style.display = 'none';
+                            cropButton.disabled = false;
+                            return;
+                        }
+                    }
+
+                    for (let i = 0; i < cropCount; i++) {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        canvas.width = CROP_WIDTH;
+                        canvas.height = CROP_HEIGHT;
+
+                        const sourceX = i * (img.width / cropCount);
+                        const sourceY = 0;
+                        const sourceWidth = img.width / cropCount;
+                        const sourceHeight = img.height;
+                        
+                        // Gambar potongan dari gambar asli ke canvas
+                        ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, CROP_WIDTH, CROP_HEIGHT);
+
+                        // Buat elemen untuk ditampilkan
+                        const resultItem = document.createElement('div');
+                        resultItem.className = 'result-item';
+
+                        const resultImg = document.createElement('img');
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.95); // Gunakan JPEG untuk ukuran file lebih kecil
+                        resultImg.src = dataUrl;
+
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = dataUrl;
+                        downloadLink.download = `feed_${i + 1}_dari_${cropCount}.jpg`;
+                        downloadLink.className = 'download-link';
+                        downloadLink.textContent = `Unduh #${i + 1}`;
+                        
+                        resultItem.appendChild(resultImg);
+                        resultItem.appendChild(downloadLink);
+                        imageGrid.appendChild(resultItem);
+                    }
+                    
+                    if(imageGrid.childElementCount > 0 && !document.getElementById('results-title')) {
+                        const resultsTitle = document.createElement('h2');
+                        resultsTitle.id = 'results-title';
+                        resultsTitle.textContent = 'Hasil Potongan (Klik untuk Unduh)';
+                        imageGrid.before(resultsTitle);
+                    }
+                    
+                    spinner.style.display = 'none';
+                    cropButton.disabled = false;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(originalImage);
+        });
+
+        // Inisialisasi rekomendasi ukuran saat halaman dimuat
+        updateRecommendation();
+    </script>
+
+</body>
+</html>
