@@ -3,174 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IG Feed Crop Tool</title>
+    <title>IG Feed Crop Tool PRO</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+            --accent-gradient: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            --accent-color: #dc2743;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+            --border-radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f0f2f5;
-            color: #1c1e21;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
+            padding: 40px 20px;
         }
-        .container {
-            background-color: #ffffff;
-            padding: 25px 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+        .app-container {
             width: 100%;
-            max-width: 800px;
-            box-sizing: border-box;
+            max-width: 900px;
         }
-        h1 {
-            color: #d62976;
+
+        header {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 40px;
         }
-        p.instructions {
-            text-align: center;
-            font-size: 14px;
-            color: #606770;
-            margin-bottom: 25px;
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
         }
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 25px;
+
+        header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
         }
+
+        .tool-card {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            align-items: end;
+        }
+
         .control-group {
             display: flex;
             flex-direction: column;
         }
+
         label {
             font-weight: 600;
-            margin-bottom: 5px;
-            font-size: 14px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
         }
-        input[type="file"], select {
-            padding: 10px;
-            border: 1px solid #dddfe2;
-            border-radius: 6px;
-            font-size: 16px;
+
+        select, input[type="file"]::file-selector-button {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            background-color: #fdfdfd;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
-        #size-recommendation {
-            font-size: 12px;
-            color: #007bff;
-            margin-top: 5px;
-            height: 15px;
+        
+        input[type="file"] {
+            font-size: 1rem;
         }
-        button {
-            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+        
+        input[type="file"]::file-selector-button {
+            margin-right: 12px;
+            background: var(--accent-gradient);
             color: white;
-            padding: 12px 20px;
             border: none;
-            border-radius: 6px;
-            font-size: 18px;
-            font-weight: bold;
             cursor: pointer;
-            transition: opacity 0.2s;
         }
-        button:hover {
-            opacity: 0.9;
+        
+        select:focus, input[type="file"]:focus-within {
+             outline: none;
+             border-color: var(--accent-color);
+             box-shadow: 0 0 0 3px rgba(220, 39, 67, 0.2);
         }
-        button:disabled {
-            background: #cccccc;
+
+        #size-recommendation {
+            font-size: 0.8rem;
+            color: var(--accent-color);
+            margin-top: 8px;
+            height: 15px;
+            font-weight: 500;
+        }
+        
+        .button-container {
+            grid-column: 1 / -1;
+        }
+
+        #crop-button {
+            width: 100%;
+            background: var(--accent-gradient);
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        #crop-button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(220, 39, 67, 0.3);
+        }
+
+        #crop-button:disabled {
+            background: #ccc;
             cursor: not-allowed;
         }
-        #results-container {
-            margin-top: 20px;
-        }
-        h2 {
+        
+        #results-section {
+            margin-top: 40px;
             text-align: center;
-            color: #333;
-            border-top: 1px solid #e0e0e0;
-            padding-top: 20px;
         }
+        
+        #results-section h2 {
+            margin-bottom: 25px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .spinner-container {
+            display: none;
+            padding: 40px;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         #image-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
         }
+
         .result-item {
             position: relative;
-            border: 1px solid #ddd;
-            background: #eee;
-            border-radius: 4px;
+            border-radius: var(--border-radius);
             overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            aspect-ratio: 1080 / 1350;
+        }
+        .result-item:hover {
+            transform: scale(1.05);
+            z-index: 10;
         }
         .result-item img {
             display: block;
-            max-width: 150px; /* Thumbnail size */
-            height: auto;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
-        .result-item .download-link {
+        .image-number {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .download-link {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.7);
             color: white;
             text-align: center;
-            padding: 5px 0;
+            padding: 10px 0;
             text-decoration: none;
-            font-size: 12px;
-            font-weight: bold;
+            font-size: 0.9rem;
+            font-weight: 500;
             opacity: 0;
-            transition: opacity 0.2s;
+            transform: translateY(100%);
+            transition: opacity 0.3s, transform 0.3s;
         }
         .result-item:hover .download-link {
             opacity: 1;
+            transform: translateY(0);
         }
-        #spinner {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-            font-weight: bold;
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { padding: 20px 15px; }
+            header h1 { font-size: 2rem; }
+            .controls-grid { grid-template-columns: 1fr; }
+            #image-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>IG Feed Crop Tool</h1>
-        <p class="instructions">Potong satu gambar panorama menjadi beberapa bagian untuk postingan carousel Instagram.</p>
-        
-        <div class="controls">
-            <div class="control-group">
-                <label for="image-input">1. Unggah Gambar Anda</label>
-                <input type="file" id="image-input" accept="image/*">
+    <div class="app-container">
+        <header>
+            <h1>IG Feed Crop Tool</h1>
+            <p>Potong gambar panorama menjadi beberapa bagian untuk carousel Instagram.</p>
+        </header>
+
+        <main>
+            <div class="tool-card">
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label for="image-input">Langkah 1: Unggah Gambar</label>
+                        <input type="file" id="image-input" accept="image/*">
+                    </div>
+                    <div class="control-group">
+                        <label for="crop-count">Langkah 2: Pilih Jumlah Feed</label>
+                        <select id="crop-count">
+                            <option value="1">1 Feed (1080x1350 px)</option>
+                            <option value="2">2 Feed (2160x1350 px)</option>
+                            <option value="3">3 Feed (3240x1350 px)</option>
+                            <option value="4">4 Feed (4320x1350 px)</option>
+                            <option value="5">5 Feed (5400x1350 px)</option>
+                            <option value="6">6 Feed (6480x1350 px)</option>
+                            <option value="7" selected>7 Feed (7560x1350 px)</option>
+                            <option value="8">8 Feed (8640x1350 px)</option>
+                            <option value="9">9 Feed (9720x1350 px)</option>
+                            <option value="10">10 Feed (10800x1350 px)</option>
+                        </select>
+                        <div id="size-recommendation"></div>
+                    </div>
+                    <div class="button-container">
+                       <button id="crop-button" disabled>Langkah 3: Potong & Unduh Gambar</button>
+                    </div>
+                </div>
             </div>
 
-            <div class="control-group">
-                <label for="crop-count">2. Pilih Jumlah Potongan (Feed)</label>
-                <select id="crop-count">
-                    <option value="1">1 Feed (1080 x 1350 piks)</option>
-                    <option value="2">2 Feed (2160 x 1350 piks)</option>
-                    <option value="3">3 Feed (3240 x 1350 piks)</option>
-                    <option value="4">4 Feed (4320 x 1350 piks)</option>
-                    <option value="5">5 Feed (5400 x 1350 piks)</option>
-                    <option value="6">6 Feed (6480 x 1350 piks)</option>
-                    <option value="7" selected>7 Feed (7560 x 1350 piks)</option>
-                    <option value="8">8 Feed (8640 x 1350 piks)</option>
-                    <option value="9">9 Feed (9720 x 1350 piks)</option>
-                    <option value="10">10 Feed (10800 x 1350 piks)</option>
-                </select>
-                <div id="size-recommendation"></div>
-            </div>
-
-            <button id="crop-button" disabled>3. Potong & Unduh</button>
-        </div>
-
-        <div id="spinner">Memproses... mohon tunggu.</div>
-
-        <div id="results-container">
-            <div id="image-grid"></div>
-        </div>
+            <section id="results-section">
+                <div class="spinner-container">
+                    <div class="spinner"></div>
+                </div>
+                <div id="image-grid"></div>
+            </section>
+        </main>
     </div>
 
     <script>
@@ -178,25 +301,26 @@
         const cropCountSelect = document.getElementById('crop-count');
         const cropButton = document.getElementById('crop-button');
         const imageGrid = document.getElementById('image-grid');
-        const spinner = document.getElementById('spinner');
+        const spinnerContainer = document.querySelector('.spinner-container');
         const sizeRecommendation = document.getElementById('size-recommendation');
+        const resultsSection = document.getElementById('results-section');
 
         const CROP_HEIGHT = 1350;
         const CROP_WIDTH = 1080;
-        let originalImage = null;
+        let originalImageFile = null;
 
         function updateRecommendation() {
             const count = parseInt(cropCountSelect.value, 10);
             const recommendedWidth = CROP_WIDTH * count;
-            sizeRecommendation.textContent = `Ukuran gambar yang disarankan: ${recommendedWidth}px x ${CROP_HEIGHT}px`;
+            sizeRecommendation.textContent = `Saran: ${recommendedWidth}px x ${CROP_HEIGHT}px`;
         }
 
         imageInput.addEventListener('change', (event) => {
             if (event.target.files && event.target.files[0]) {
-                originalImage = event.target.files[0];
+                originalImageFile = event.target.files[0];
                 cropButton.disabled = false;
             } else {
-                originalImage = null;
+                originalImageFile = null;
                 cropButton.disabled = true;
             }
         });
@@ -204,13 +328,13 @@
         cropCountSelect.addEventListener('change', updateRecommendation);
         
         cropButton.addEventListener('click', () => {
-            if (!originalImage) {
+            if (!originalImageFile) {
                 alert('Silakan pilih file gambar terlebih dahulu.');
                 return;
             }
 
             cropButton.disabled = true;
-            spinner.style.display = 'block';
+            spinnerContainer.style.display = 'block';
             imageGrid.innerHTML = ''; // Hapus hasil sebelumnya
 
             const cropCount = parseInt(cropCountSelect.value, 10);
@@ -219,16 +343,14 @@
             reader.onload = (e) => {
                 const img = new Image();
                 img.onload = () => {
-                    // Cek rasio aspek
                     const expectedWidth = cropCount * CROP_WIDTH;
-                    if (img.width !== expectedWidth || img.height !== CROP_HEIGHT) {
+                    if (img.width < expectedWidth || img.height < CROP_HEIGHT) {
                         const userConfirmed = confirm(
-                            `Peringatan: Ukuran gambar Anda adalah ${img.width}x${img.height}px.\n` +
-                            `Ukuran yang disarankan untuk ${cropCount} feed adalah ${expectedWidth}x${CROP_HEIGHT}px.\n\n` +
-                            `Hasilnya mungkin tidak sempurna. Tetap lanjutkan?`
+                            `Peringatan: Ukuran gambar Anda (${img.width}x${img.height}px) lebih kecil dari yang disarankan (${expectedWidth}x${CROP_HEIGHT}px).\n\n` +
+                            `Hasilnya mungkin akan pecah atau tidak sesuai. Tetap lanjutkan?`
                         );
                         if (!userConfirmed) {
-                            spinner.style.display = 'none';
+                            spinnerContainer.style.display = 'none';
                             cropButton.disabled = false;
                             return;
                         }
@@ -246,45 +368,40 @@
                         const sourceWidth = img.width / cropCount;
                         const sourceHeight = img.height;
                         
-                        // Gambar potongan dari gambar asli ke canvas
                         ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, CROP_WIDTH, CROP_HEIGHT);
 
-                        // Buat elemen untuk ditampilkan
                         const resultItem = document.createElement('div');
                         resultItem.className = 'result-item';
 
                         const resultImg = document.createElement('img');
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.95); // Gunakan JPEG untuk ukuran file lebih kecil
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
                         resultImg.src = dataUrl;
+
+                        const numberSpan = document.createElement('span');
+                        numberSpan.className = 'image-number';
+                        numberSpan.textContent = i + 1;
 
                         const downloadLink = document.createElement('a');
                         downloadLink.href = dataUrl;
-                        downloadLink.download = `feed_${i + 1}_dari_${cropCount}.jpg`;
+                        downloadLink.download = `feed_${String(i + 1).padStart(2, '0')}.jpg`;
                         downloadLink.className = 'download-link';
-                        downloadLink.textContent = `Unduh #${i + 1}`;
+                        downloadLink.innerHTML = `Unduh #${i + 1}`;
                         
                         resultItem.appendChild(resultImg);
+                        resultItem.appendChild(numberSpan);
                         resultItem.appendChild(downloadLink);
                         imageGrid.appendChild(resultItem);
                     }
                     
-                    if(imageGrid.childElementCount > 0 && !document.getElementById('results-title')) {
-                        const resultsTitle = document.createElement('h2');
-                        resultsTitle.id = 'results-title';
-                        resultsTitle.textContent = 'Hasil Potongan (Klik untuk Unduh)';
-                        imageGrid.before(resultsTitle);
-                    }
-                    
-                    spinner.style.display = 'none';
+                    spinnerContainer.style.display = 'none';
                     cropButton.disabled = false;
                 };
                 img.src = e.target.result;
             };
-            reader.readAsDataURL(originalImage);
+            reader.readAsDataURL(originalImageFile);
         });
 
-        // Inisialisasi rekomendasi ukuran saat halaman dimuat
-        updateRecommendation();
+        updateRecommendation(); // Panggil saat halaman pertama kali dimuat
     </script>
 
 </body>
